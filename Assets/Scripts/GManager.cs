@@ -43,7 +43,7 @@ public class GManager : MonoBehaviour
     }
     private void FixedUpdate()
     {
-        Debug.Log(_hp);
+        //Debug.Log(_hp);
         if(_hp <= 0)
         {
             Title();
