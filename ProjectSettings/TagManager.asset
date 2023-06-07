@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Plank
   - Holdable
+  - Ladder
   layers:
   - Default
   - TransparentFX

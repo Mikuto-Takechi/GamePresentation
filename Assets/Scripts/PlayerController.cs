@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.Burst.CompilerServices;
 using UnityEngine;
+using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
 
 public class PlayerController : MonoBehaviour
 {
@@ -13,10 +14,14 @@ public class PlayerController : MonoBehaviour
     Animator m_Animator;
     AudioSource m_AudioSource;
     Rigidbody2D m_rigidbody = default;
+    Renderer m_Renderer;
     float m_horizontal;
     Vector3 m_initialPosition;
     bool isGrounded = false;
     bool isHolding = false;
+    bool isCliming = false;
+    bool jumpButtonFlag = false;
+    bool rainbow = true;
 
     public Vector3 InitialPosition
     {
@@ -33,14 +38,28 @@ public class PlayerController : MonoBehaviour
         m_AudioSource = GetComponent<AudioSource>();
         m_Animator = GetComponent<Animator>();
         m_rigidbody = GetComponent<Rigidbody2D>();
+        m_Renderer = GetComponent<Renderer>();
         m_initialPosition = this.transform.position;
     }
 
     void Update()
     {
+            m_Renderer.material.color = Color.HSVToRGB(Time.time % 1, 1,1);
+        
+        if(Input.GetButton("Jump"))
+        {
+            jumpButtonFlag = true;
+        }
+        else if(Input.GetButtonUp("Jump"))
+        {
+            jumpButtonFlag = false;
+        }
         m_horizontal = Input.GetAxisRaw("Horizontal");
-
-        if (Input.GetButtonDown("Jump") && (isGrounded))
+        if(jumpButtonFlag && (isCliming))
+        {
+            m_rigidbody.velocity = new Vector2(0, 5);
+        }
+        else if (Input.GetButtonDown("Jump") && (isGrounded))
         {
             m_rigidbody.AddForce(Vector2.up * m_jumpPower, ForceMode2D.Impulse);//Impulse‚É‚·‚é‚Æ”š”­“I‚É”ò‚Ô
         }
@@ -48,6 +67,7 @@ public class PlayerController : MonoBehaviour
         if(Input.GetButtonDown("Fire1"))
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            Debug.DrawRay((Vector2)ray.origin, (Vector2)ray.direction);
             RaycastHit2D hit2d = Physics2D.Raycast((Vector2)ray.origin, (Vector2)ray.direction);
             if(hit2d.collider.CompareTag("Holdable") && Vector2.Distance((Vector2)ray.origin, (Vector2)transform.position) < 2 && !isHolding)
             {
@@ -91,7 +111,7 @@ public class PlayerController : MonoBehaviour
         m_Animator.Play("PlayerHurt");
         m_AudioSource.PlayOneShot(m_hurtAudioClip);
     }
-    void FixedUpdate()//‰¡ˆÚ“®‚Ìˆ—‚Ífixedupdate‚Ås‚¤
+    void FixedUpdate()//‰¡ˆÚ“®
     {
         if(m_rigidbody.velocity.magnitude < m_maxMovePower)
         {
@@ -110,6 +130,10 @@ public class PlayerController : MonoBehaviour
         {
             transform.SetParent(collision.transform);
         }
+        if(collision.gameObject.tag == "Ladder")
+        {
+            isCliming = true;
+        }
         isGrounded = true;
     }
 
@@ -118,6 +142,10 @@ public class PlayerController : MonoBehaviour
         if (collision.gameObject.tag == "Plank")
         {
             transform.SetParent(null);
+        }
+        if (collision.gameObject.tag == "Ladder")
+        {
+            isCliming = false;
         }
         isGrounded = false;
     }
