@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.Burst.CompilerServices;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
 
 public class PlayerController : MonoBehaviour
@@ -11,6 +12,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float m_jumpPower = 5f;
     [SerializeField] AudioClip m_hurtAudioClip = default;
     [SerializeField] AudioClip m_deathAudioClip = default;
+    [SerializeField] Tilemap m_tilemap;
+    GameObject m_selectionTile;
     Animator m_Animator;
     AudioSource m_AudioSource;
     Rigidbody2D m_rigidbody = default;
@@ -22,7 +25,8 @@ public class PlayerController : MonoBehaviour
     bool isCliming = false;
     bool jumpButtonFlag = false;
     bool rainbow = true;
-
+    float m_interval = 0.1f;
+    float m_timer = 0.0f;
     public Vector3 InitialPosition
     {
         set { m_initialPosition = value; }
@@ -39,14 +43,32 @@ public class PlayerController : MonoBehaviour
         m_Animator = GetComponent<Animator>();
         m_rigidbody = GetComponent<Rigidbody2D>();
         m_Renderer = GetComponent<Renderer>();
+        m_selectionTile = GameObject.Find("SelectionTile");
+        if(m_selectionTile)
+        {
+            m_selectionTile.SetActive(false);
+        }
         m_initialPosition = this.transform.position;
     }
 
     void Update()
     {
-            m_Renderer.material.color = Color.HSVToRGB(Time.time % 1, 1,1);
+        m_timer += Time.deltaTime;
+        if(m_timer > m_interval) 
+        {
+            m_selectionTile.GetComponent<SpriteRenderer>().color = new Color(1.0f, 1.0f, 1.0f, 0.2f);
+            m_timer = 0.0f;
+        }
+        m_Renderer.material.color = Color.HSVToRGB(Time.time % 1, 1,1);//ì¯êF
+        Vector3 worldMousePoint = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        Vector3Int gridPos = m_tilemap.WorldToCell(worldMousePoint);
+        Vector3 completePos = new Vector3(m_tilemap.cellSize.x / 2, m_tilemap.cellSize.y / 2, 0);
+        Vector3 worldPos = m_tilemap.CellToWorld(gridPos) + completePos;
+        m_selectionTile.SetActive(true);
+        m_selectionTile.transform.position = worldPos;
         
-        if(Input.GetButton("Jump"))
+
+        if (Input.GetButton("Jump"))
         {
             jumpButtonFlag = true;
         }
@@ -66,8 +88,9 @@ public class PlayerController : MonoBehaviour
 
         if(Input.GetButtonDown("Fire1"))
         {
+            m_selectionTile.GetComponent<SpriteRenderer>().color = new Color(0.6f, 0.6f, 0.6f, 0.2f);
+            m_timer = 0.0f;
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            Debug.DrawRay((Vector2)ray.origin, (Vector2)ray.direction);
             RaycastHit2D hit2d = Physics2D.Raycast((Vector2)ray.origin, (Vector2)ray.direction);
             if(hit2d.collider.CompareTag("Holdable") && Vector2.Distance((Vector2)ray.origin, (Vector2)transform.position) < 2 && !isHolding)
             {
@@ -113,15 +136,15 @@ public class PlayerController : MonoBehaviour
     }
     void FixedUpdate()//â°à⁄ìÆ
     {
-        if(m_rigidbody.velocity.magnitude < m_maxMovePower)
+        if (m_rigidbody.velocity.magnitude > m_maxMovePower)
         {
+            m_rigidbody.velocity = m_rigidbody.velocity.normalized * m_maxMovePower;
+        }
             if(!isGrounded)
             {
                 m_rigidbody.AddForce(Vector2.right * m_horizontal * m_movePower / 2, ForceMode2D.Force);
             }
             else m_rigidbody.AddForce(Vector2.right * m_horizontal * m_movePower, ForceMode2D.Force);
-
-        }
     }
 
     void OnTriggerStay2D(Collider2D collision)
