@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Unity.Burst.CompilerServices;
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using UnityEngine.UI;
 using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
 
 public class PlayerController : MonoBehaviour
@@ -13,7 +14,11 @@ public class PlayerController : MonoBehaviour
     [SerializeField] AudioClip m_hurtAudioClip = default;
     [SerializeField] AudioClip m_deathAudioClip = default;
     [SerializeField] Tilemap m_tilemap;
+    [SerializeField] Slider m_hpSlider;
+    Image m_holdItem;
     GameObject m_selectionTile;
+    GameObject m_arrow;
+    GameObject m_vanner;
     Animator m_Animator;
     AudioSource m_AudioSource;
     Rigidbody2D m_rigidbody = default;
@@ -44,16 +49,26 @@ public class PlayerController : MonoBehaviour
         m_rigidbody = GetComponent<Rigidbody2D>();
         m_Renderer = GetComponent<Renderer>();
         m_selectionTile = GameObject.Find("SelectionTile");
-        if(m_selectionTile)
+        m_arrow = GameObject.Find("Player/WorldCanvas/Arrow");
+        m_vanner = GameObject.Find("Vanner");
+        m_holdItem = GameObject.Find("DisplayCanvas/Inventory/HoldItem").GetComponent<Image>();
+        if (m_selectionTile)
         {
             m_selectionTile.SetActive(false);
         }
+        if(m_holdItem)
+        {
+            m_holdItem.enabled = false;
+        }
         m_initialPosition = this.transform.position;
+        m_hpSlider.value = GManager.instance.hpDefault;
     }
 
     void Update()
     {
         m_timer += Time.deltaTime;
+        m_hpSlider.value = (float)GManager.instance.Hp / (float)GManager.instance.hpDefault;
+        m_arrow.transform.up = m_vanner.transform.position - transform.position;
         if(m_timer > m_interval) 
         {
             m_selectionTile.GetComponent<SpriteRenderer>().color = new Color(1.0f, 1.0f, 1.0f, 0.2f);
@@ -100,13 +115,15 @@ public class PlayerController : MonoBehaviour
                 hit2d.collider.enabled = false;
                 hit2d.collider.transform.SetParent(transform);
                 hit2d.collider.transform.position = new Vector3(x, y+1, 0);
+                m_holdItem.enabled = true;
+                m_holdItem.sprite = hit2d.collider.GetComponent<SpriteRenderer>().sprite;
                 isHolding = true;
             }
         }
 
         if(Input.GetButtonDown("Fire2"))
         {
-            Transform child = transform.Find("MoveableBlock");
+            Transform child = transform.GetChild(1);
             if(child != null)
             {
                 Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -115,7 +132,9 @@ public class PlayerController : MonoBehaviour
                 cRigidbody.isKinematic = false;
                 cRigidbody.velocity = forward * child.GetComponent<MoveableBlockController>()._throwSpeed;
                 child.GetComponent<Collider2D>().enabled = true;
+                child.GetComponent<MoveableBlockController>()._projectile = true;
                 child.SetParent(null);
+                m_holdItem.enabled = false;
                 isHolding = false;
             }
         }

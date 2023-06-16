@@ -8,10 +8,6 @@ public class TextController : MonoBehaviour
     [SerializeField] Text _text1 = default;
     [SerializeField] Text _text2 = default;
     [SerializeField] Text _text3 = default;
-    void Start()
-    {
-
-    }
 
     void Update()
     {

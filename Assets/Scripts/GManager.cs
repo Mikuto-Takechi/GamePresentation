@@ -27,6 +27,10 @@ public class GManager : MonoBehaviour
         set { _hp = value; }
         get { return _hp; }
     }
+    public int hpDefault
+    {
+        get { return _hpDefault; }
+    }
     private void Awake()
     {
         if(instance == null)

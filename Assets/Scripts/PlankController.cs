@@ -10,6 +10,8 @@ public class PlankController : MonoBehaviour
     [SerializeField] float _stoppingDistance = 0.05f;
     [SerializeField] float _l = 5;
     [SerializeField] bool _toggleRotateMove = false;
+    [SerializeField] int _dNum = 1;
+    [SerializeField] int _num = 1;
     int _currentTargetIndex = 0;
     float _th = 0.0f;
 
@@ -43,8 +45,10 @@ public class PlankController : MonoBehaviour
     
     void RotateMove()
     {
-        float x = _targets[_currentTargetIndex].position.x + _l * Mathf.Cos(_th * _rotateSpeed);
-        float y = _targets[_currentTargetIndex].position.y + _l * Mathf.Sin(_th * _rotateSpeed);
+        float angle = _num * (360 / _dNum) + 90f;
+        float rad = angle * Mathf.Deg2Rad;
+        float x = _targets[_currentTargetIndex].position.x + _l * Mathf.Cos(_th * _rotateSpeed +rad);
+        float y = _targets[_currentTargetIndex].position.y + _l * Mathf.Sin(_th * _rotateSpeed +rad);
         gameObject.transform.position = new Vector3(x, y, 0);
         _th += Time.deltaTime;
     }
