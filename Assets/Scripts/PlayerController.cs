@@ -8,7 +8,6 @@ using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
 
 public class PlayerController : MonoBehaviour
 {
-    [SerializeField] float m_movePower = 10f;
     [SerializeField] float m_maxMovePower = 10f;
     [SerializeField] float m_jumpPower = 5f;
     [SerializeField] AudioClip m_hurtAudioClip = default;
@@ -18,6 +17,7 @@ public class PlayerController : MonoBehaviour
     Image m_holdItem;
     GameObject m_selectionTile;
     GameObject m_arrow;
+    Text m_arrowMessage;
     GameObject m_vanner;
     Animator m_Animator;
     AudioSource m_AudioSource;
@@ -50,6 +50,7 @@ public class PlayerController : MonoBehaviour
         m_Renderer = GetComponent<Renderer>();
         m_selectionTile = GameObject.Find("SelectionTile");
         m_arrow = GameObject.Find("Player/WorldCanvas/Arrow");
+        m_arrowMessage = GameObject.Find("Player/WorldCanvas/ArrowMessage").GetComponent<Text>();
         m_vanner = GameObject.Find("Vanner");
         m_holdItem = GameObject.Find("DisplayCanvas/Inventory/HoldItem").GetComponent<Image>();
         if (m_selectionTile)
@@ -69,6 +70,8 @@ public class PlayerController : MonoBehaviour
         m_timer += Time.deltaTime;
         m_hpSlider.value = (float)GManager.instance.Hp / (float)GManager.instance.hpDefault;
         m_arrow.transform.up = m_vanner.transform.position - transform.position;
+        int distance = (int)Vector2.Distance((Vector2)transform.position, (Vector2)m_vanner.transform.position);
+        m_arrowMessage.text = $"ƒS[ƒ‹‚Ü‚Å{distance}m";
         if(m_timer > m_interval) 
         {
             m_selectionTile.GetComponent<SpriteRenderer>().color = new Color(1.0f, 1.0f, 1.0f, 0.2f);
@@ -81,7 +84,6 @@ public class PlayerController : MonoBehaviour
         Vector3 worldPos = m_tilemap.CellToWorld(gridPos) + completePos;
         m_selectionTile.SetActive(true);
         m_selectionTile.transform.position = worldPos;
-        
 
         if (Input.GetButton("Jump"))
         {
@@ -123,7 +125,7 @@ public class PlayerController : MonoBehaviour
 
         if(Input.GetButtonDown("Fire2"))
         {
-            Transform child = transform.GetChild(1);
+            Transform child = transform.GetChild(2);
             if(child != null)
             {
                 Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -161,18 +163,18 @@ public class PlayerController : MonoBehaviour
         }
             if(!isGrounded)
             {
-                m_rigidbody.AddForce(Vector2.right * m_horizontal * m_movePower / 2, ForceMode2D.Force);
+                m_rigidbody.AddForce(Vector2.right * m_horizontal * m_maxMovePower / 2, ForceMode2D.Force);
             }
-            else m_rigidbody.AddForce(Vector2.right * m_horizontal * m_movePower, ForceMode2D.Force);
+            else m_rigidbody.AddForce(Vector2.right * m_horizontal * m_maxMovePower, ForceMode2D.Force);
     }
 
     void OnTriggerStay2D(Collider2D collision)
     {
-        if(collision.gameObject.tag == "Plank")
+        if (collision.gameObject.tag == "Plank")
         {
             transform.SetParent(collision.transform);
         }
-        if(collision.gameObject.tag == "Ladder")
+        if (collision.gameObject.tag == "Ladder")
         {
             isCliming = true;
         }

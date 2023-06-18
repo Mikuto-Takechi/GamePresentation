@@ -146,4 +146,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f0b020a51a24362448766751babd37ba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _messageDistance: 2
   _throwSpeed: 10
+  _projectile: 0

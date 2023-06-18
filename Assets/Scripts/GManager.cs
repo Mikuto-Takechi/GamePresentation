@@ -45,18 +45,4 @@ public class GManager : MonoBehaviour
         _score = _scoreDefault;
         _hp = _hpDefault;
     }
-    private void FixedUpdate()
-    {
-        //Debug.Log(_hp);
-        if(_hp <= 0)
-        {
-            Title();
-        }
-    }
-    public void Title()
-    {
-        SceneManager.LoadScene("TitleScene");
-        _score = _scoreDefault;
-        _hp = _hpDefault;
-    }
 }
