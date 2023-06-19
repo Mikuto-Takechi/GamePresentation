@@ -46,8 +46,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _scoreDefault: 0
-  _hpDefault: 5
-  _gameOverSound: {fileID: 8300000, guid: 278e631b8294b544cadf3286d7fa0c61, type: 3}
+  _hpDefault: 30
 --- !u!82 &6692467387197411011
 AudioSource:
   m_ObjectHideFlags: 0
