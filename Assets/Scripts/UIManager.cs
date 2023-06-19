@@ -39,7 +39,7 @@ public class UIManager : MonoBehaviour
         string scoreText = GManager.instance.Score.ToString();
         _gameClearCanvas.transform.GetChild(0).GetChild(0).GetComponent<Text>().text = $"最終スコア：{scoreText}";
         float stageTime = _timeManager.GetComponent<TimeManager>().StageTime;
-        _gameClearCanvas.transform.GetChild(0).GetChild(1).GetComponent<Text>().text = $"クリアタイム：{Mathf.Ceil(stageTime)}";
+        _gameClearCanvas.transform.GetChild(0).GetChild(1).GetComponent<Text>().text = "クリアタイム：" + stageTime.ToString("F2");
         Time.timeScale = 0.0f;
     }
 
