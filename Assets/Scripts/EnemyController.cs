@@ -1,9 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class EnemyController : MonoBehaviour
 {
+    [SerializeField] int _maxHealth = 6;
+    [SerializeField] int _killScore = 10;
     [SerializeField] float _moveSpeed = 1.0f;
     [SerializeField] Vector2 _lineForWall = Vector2.right;
     [SerializeField] Vector2 _lineForGround = new Vector2(1f, -1f);
@@ -15,21 +18,48 @@ public class EnemyController : MonoBehaviour
     SpriteRenderer _sr;
     Transform _shooter;
     Transform _muzzle;
+    Slider _healthSlider;
+    Text _healthText;
+    Text _damageText;
     bool _moveLeft = false;
-    float _timer;
+    int _currentHealth = 0;
+    float _timer, _damageUITimer, _damageUIInterval = 1.0f;
+
+    public int CurrentHealth
+    {
+        set { _currentHealth = value; }
+        get { return _currentHealth; }
+    }
 
     private void Start()
     {
+        _currentHealth = _maxHealth;
         _sr = GetComponent<SpriteRenderer>();
         _rb = GetComponent<Rigidbody2D>();
         _shooter = transform.GetChild(0);
         _muzzle = _shooter.GetChild(0);
+        _healthSlider = transform.GetChild(1).GetChild(0).GetComponent<Slider>();
+        _healthText = transform.GetChild(1).GetChild(1).GetComponent<Text>();
+        _damageText = transform.GetChild(1).GetChild(2).GetComponent<Text>();
         _player = GameObject.Find("Player");
+        if(_damageText) _damageText.text = "";
     }
 
     private void Update()
     {
         _timer += Time.deltaTime;
+        _damageUITimer += Time.deltaTime;
+        _healthSlider.value = (float)_currentHealth / (float)_maxHealth;
+        _healthText.text = "HP: " + _currentHealth.ToString() + " / " + _maxHealth.ToString();
+        if(_currentHealth <= 0)
+        {
+            GManager.instance.Score += _killScore;
+            Destroy(gameObject);
+        }
+        if(_damageUITimer > _damageUIInterval)
+        {
+            _damageText.text = "";
+        }
         if (_sr.isVisible && Camera.current.name != "SceneCamera" && Camera.current.name != "Preview Camera")
         {
             Move();
@@ -98,5 +128,11 @@ public class EnemyController : MonoBehaviour
         }
         velo.y = _rb.velocity.y;    // 落下については現在の値を保持する
         _rb.velocity = velo;        // 速度ベクトルをセットする
+    }
+
+    public void DamageUI(int dam)
+    {
+        _damageText.text = $"-{dam}";
+        _damageUITimer = 0.0f;
     }
 }

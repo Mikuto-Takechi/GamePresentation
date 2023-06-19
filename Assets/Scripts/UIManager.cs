@@ -12,6 +12,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] GameObject _gameClearCanvas;
     [SerializeField] GameObject _displayCanvas;
     [SerializeField] GameObject _bGM;
+    GameObject _timeManager;
     AudioSource _audioSource;
 
     private void Start()
@@ -19,6 +20,7 @@ public class UIManager : MonoBehaviour
         _gameOverCanvas.SetActive(false);
         _gameClearCanvas.SetActive(false);
         _audioSource = gameObject.GetComponent<AudioSource>();
+        _timeManager = GameObject.Find("TimeManager");
     }
     private void FixedUpdate()
     {
@@ -35,7 +37,9 @@ public class UIManager : MonoBehaviour
         _audioSource.PlayOneShot(_gameClearSound);
         _gameClearCanvas.SetActive(true);
         string scoreText = GManager.instance.Score.ToString();
-        _gameClearCanvas.transform.GetChild(0).GetChild(0).GetComponent<Text>().text = $"最終スコア{scoreText}";
+        _gameClearCanvas.transform.GetChild(0).GetChild(0).GetComponent<Text>().text = $"最終スコア：{scoreText}";
+        float stageTime = _timeManager.GetComponent<TimeManager>().StageTime;
+        _gameClearCanvas.transform.GetChild(0).GetChild(1).GetComponent<Text>().text = $"クリアタイム：{Mathf.Ceil(stageTime)}";
         Time.timeScale = 0.0f;
     }
 
