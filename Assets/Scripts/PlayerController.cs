@@ -17,6 +17,7 @@ public class PlayerController : MonoBehaviour
     Image m_holdItem;
     GameObject m_selectionTile;
     GameObject m_arrow;
+    GameObject m_throwArrow;
     Text m_arrowMessage;
     GameObject m_vanner;
     Animator m_Animator;
@@ -50,9 +51,14 @@ public class PlayerController : MonoBehaviour
         m_Renderer = GetComponent<Renderer>();
         m_selectionTile = GameObject.Find("SelectionTile");
         m_arrow = GameObject.Find("Player/WorldCanvas/Arrow");
+        m_throwArrow = GameObject.Find("Player/WorldCanvas/ThrowArrow");
         m_arrowMessage = GameObject.Find("Player/WorldCanvas/ArrowMessage").GetComponent<Text>();
         m_vanner = GameObject.Find("Vanner");
         m_holdItem = GameObject.Find("DisplayCanvas/Inventory/HoldItem").GetComponent<Image>();
+        if(m_throwArrow)
+        {
+            m_throwArrow.GetComponent<Image>().enabled = false;
+        }
         if (m_selectionTile)
         {
             m_selectionTile.SetActive(false);
@@ -68,17 +74,21 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         m_timer += Time.deltaTime;
+        Vector3 worldMousePoint = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        Color rainbowColor = Color.HSVToRGB(Time.time % 1, 1, 1);//虹色
+        rainbowColor.a = 0.8f;//不透明度
         m_hpSlider.value = (float)GManager.instance.Hp / (float)GManager.instance.hpDefault;
         m_arrow.transform.up = m_vanner.transform.position - transform.position;
+        m_arrow.GetComponent<Image>().color = rainbowColor;
+        m_throwArrow.transform.up = (Vector2)(worldMousePoint - transform.position);
         int distance = (int)Vector2.Distance((Vector2)transform.position, (Vector2)m_vanner.transform.position);
         m_arrowMessage.text = $"ゴールまで{distance}m";
-        if(m_timer > m_interval) 
+        m_arrowMessage.color = rainbowColor;
+        if (m_timer > m_interval) 
         {
             m_selectionTile.GetComponent<SpriteRenderer>().color = new Color(1.0f, 1.0f, 1.0f, 0.2f);
             m_timer = 0.0f;
         }
-        m_Renderer.material.color = Color.HSVToRGB(Time.time % 1, 1,1);//虹色
-        Vector3 worldMousePoint = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         Vector3Int gridPos = m_tilemap.WorldToCell(worldMousePoint);
         Vector3 completePos = new Vector3(m_tilemap.cellSize.x / 2, m_tilemap.cellSize.y / 2, 0);
         Vector3 worldPos = m_tilemap.CellToWorld(gridPos) + completePos;
@@ -141,6 +151,15 @@ public class PlayerController : MonoBehaviour
             }
         }
 
+        if (isHolding)
+        {
+            m_throwArrow.GetComponent<Image>().enabled = true;
+        }
+        else
+        {
+            m_throwArrow.GetComponent<Image>().enabled = false;
+        }
+
         if (this.transform.position.y < -20f)
         {
             GManager.instance.Hp -= 5;
@@ -170,10 +189,10 @@ public class PlayerController : MonoBehaviour
 
     void OnTriggerStay2D(Collider2D collision)
     {
-        if (collision.gameObject.tag == "Plank")
-        {
-            transform.SetParent(collision.transform);
-        }
+        //if (collision.gameObject.tag == "Plank")
+        //{
+        //    transform.SetParent(collision.transform);
+        //}
         if (collision.gameObject.tag == "Ladder")
         {
             isCliming = true;
@@ -183,10 +202,10 @@ public class PlayerController : MonoBehaviour
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        if (collision.gameObject.tag == "Plank")
-        {
-            transform.SetParent(null);
-        }
+        //if (collision.gameObject.tag == "Plank")
+        //{
+        //    transform.SetParent(null);
+        //}
         if (collision.gameObject.tag == "Ladder")
         {
             isCliming = false;

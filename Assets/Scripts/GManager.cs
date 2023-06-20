@@ -11,6 +11,20 @@ public class GManager : MonoBehaviour
     private string _message;
     private int _score;
     private int _hp;
+    float _timeRecord = 999999f;
+    int _scoreRecord;
+
+    public float TimeRecord
+    {
+        set { _timeRecord = value; }
+        get { return _timeRecord; }
+    }
+
+    public int ScoreRecord
+    {
+        set { _scoreRecord = value; }
+        get { return _scoreRecord; }
+    }
 
     public string Message
     {

@@ -8,17 +8,31 @@ public class UIManager : MonoBehaviour
 {
     [SerializeField] AudioClip _gameOverSound;
     [SerializeField] AudioClip _gameClearSound;
+    [SerializeField] AudioClip _gamePauseSound;
     [SerializeField] GameObject _gameOverCanvas;
     [SerializeField] GameObject _gameClearCanvas;
+    [SerializeField] GameObject _gamePauseCanvas;
+    [SerializeField] GameObject _manualCanvas;
     [SerializeField] GameObject _displayCanvas;
     [SerializeField] GameObject _bGM;
     GameObject _timeManager;
     AudioSource _audioSource;
+    bool _gameClear = false;
+    bool _gameOver = false;
+    bool _gamePause = false;
+    int _currentPageIndex = 0;
+
+    public int CurrentPageIndex
+    {
+        get { return _currentPageIndex; }
+    }
 
     private void Start()
     {
         _gameOverCanvas.SetActive(false);
         _gameClearCanvas.SetActive(false);
+        _gamePauseCanvas.SetActive(false);
+        _manualCanvas.SetActive(false);
         _audioSource = gameObject.GetComponent<AudioSource>();
         _timeManager = GameObject.Find("TimeManager");
     }
@@ -29,6 +43,13 @@ public class UIManager : MonoBehaviour
             GameOver();
         }
     }
+    private void Update()
+    {
+        if (Input.GetButtonDown("Pause"))
+        {
+            GamePause();
+        }
+    }
 
     public void GameClear()
     {
@@ -36,11 +57,76 @@ public class UIManager : MonoBehaviour
         _bGM.SetActive(false);
         _audioSource.PlayOneShot(_gameClearSound);
         _gameClearCanvas.SetActive(true);
-        string scoreText = GManager.instance.Score.ToString();
-        _gameClearCanvas.transform.GetChild(0).GetChild(0).GetComponent<Text>().text = $"最終スコア：{scoreText}";
+
+        string scoreStr = GManager.instance.Score.ToString();
+        string scoreText = $"スコア：{scoreStr}";
+        if (GManager.instance.ScoreRecord < GManager.instance.Score)
+        {
+            GManager.instance.ScoreRecord = GManager.instance.Score;
+            scoreText = $"スコア：{scoreStr} 記録更新！！";
+        }
+        _gameClearCanvas.transform.GetChild(0).GetChild(0).GetComponent<Text>().text = scoreText;
+
         float stageTime = _timeManager.GetComponent<TimeManager>().StageTime;
-        _gameClearCanvas.transform.GetChild(0).GetChild(1).GetComponent<Text>().text = "クリアタイム：" + stageTime.ToString("F2");
+        string timeText = $"クリアタイム：{stageTime.ToString("F2")}";
+        if(GManager.instance.TimeRecord > stageTime)
+        {
+            GManager.instance.TimeRecord = stageTime;
+            timeText = $"クリアタイム：{stageTime.ToString("F2")} 記録更新！！";
+        }
+        _gameClearCanvas.transform.GetChild(0).GetChild(1).GetComponent<Text>().text = timeText;
+        _gameClear = true;
         Time.timeScale = 0.0f;
+    }
+
+    public void GamePause()
+    {
+        if( !_gameClear && !_gameOver && !_gamePause)
+        {
+            _displayCanvas.SetActive(false);
+            _bGM.SetActive(false);
+            _audioSource.PlayOneShot(_gamePauseSound);
+            _gamePauseCanvas.SetActive(true);
+            float stageTime = _timeManager.GetComponent<TimeManager>().StageTime;
+            _gamePauseCanvas.transform.GetChild(0).GetChild(0).GetComponent<Text>().text = "現在のタイム：" + stageTime.ToString("F2");
+            _gamePause = true;
+            Time.timeScale = 0.0f;
+        }
+    }
+
+    public void Return()
+    {
+        _displayCanvas.SetActive(true);
+        _bGM.SetActive(true);
+        _gamePauseCanvas.SetActive(false);
+        _gamePause = false;
+        _currentPageIndex = 0;
+        Time.timeScale = 1.0f;
+    }
+
+    public void Manual()
+    {
+        _gamePauseCanvas.SetActive(!_gamePauseCanvas.activeSelf);
+        _manualCanvas.SetActive(!_manualCanvas.activeSelf);
+        if( _manualCanvas.activeSelf )
+        {
+            Page();
+        }
+    }
+    public void Page()
+    {
+        if (_manualCanvas.activeSelf)
+        {
+            GameObject[] pages = { _manualCanvas.transform.GetChild(0).gameObject, _manualCanvas.transform.GetChild(1).gameObject };
+            foreach (GameObject page in pages)
+            {
+                page.gameObject.SetActive(false);
+            }
+            pages[_currentPageIndex].gameObject.SetActive(true);
+            _manualCanvas.transform.Find("Page").GetChild(0).GetComponent<Text>().text = $"ページ切り替え\n{_currentPageIndex + 1} / {pages.Length}";
+            _currentPageIndex++;
+            _currentPageIndex %= pages.Length;
+        }
     }
 
     private void GameOver()
@@ -51,6 +137,7 @@ public class UIManager : MonoBehaviour
         _gameOverCanvas.SetActive(true);
         string scoreText = GManager.instance.Score.ToString();
         _gameOverCanvas.transform.GetChild(0).GetChild(0).GetComponent<Text>().text = $"最終スコア{scoreText}";
+        _gameOver = true;
         Time.timeScale = 0.0f;
     }
     public void Title()

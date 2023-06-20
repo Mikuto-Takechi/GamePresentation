@@ -3,9 +3,18 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class SManager : MonoBehaviour
 {
+    [SerializeField] GameObject _recordUI;
+    private void FixedUpdate()
+    {
+        if(_recordUI)
+        {
+            _recordUI.GetComponent<Text>().text = $"現在最速クリアタイム：{GManager.instance.TimeRecord.ToString("F2")}\n現在最高スコア：{GManager.instance.ScoreRecord}";
+        }
+    }
     public void StartGame()
     {
         SceneManager.LoadScene("Stage1");
