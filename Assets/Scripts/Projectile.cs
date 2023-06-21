@@ -2,10 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Arrow : MonoBehaviour
+public class Projectile : MonoBehaviour
 {
     [SerializeField] float _initSpeed = 5f;
-    [SerializeField] int _damage = 2;
+    [SerializeField] int _damage = -2;
     private void Start()
     {
         Rigidbody2D rb = GetComponent<Rigidbody2D>();
@@ -22,10 +22,12 @@ public class Arrow : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if(collision.gameObject.tag == "Player")
+        if (collision.gameObject.tag == "Player")
         {
-            GManager.instance.Hp -= _damage;
-            collision.gameObject.GetComponent<PlayerController>().HurtPlay();
+            var player = collision.gameObject.GetComponent<PlayerController>();
+            GManager.instance.Hp += _damage;
+            player.HPTransition(_damage);
+            player.HurtPlay();
         }
         Destroy(this.gameObject);
     }

@@ -17,7 +17,7 @@ public class PlankController : MonoBehaviour
 
     private void Update()
     {
-        if(!_toggleRotateMove)
+        if (!_toggleRotateMove)
         {
             PatrolMove();
         }
@@ -29,7 +29,7 @@ public class PlankController : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if(collision.gameObject.tag == "Player" || collision.gameObject.tag == "Holdable" || collision.gameObject.tag == "Enemy")
+        if (collision.gameObject.tag == "Player" || collision.gameObject.tag == "Holdable" || collision.gameObject.tag == "Enemy")
         {
             collision.transform.SetParent(transform);
         }
@@ -58,13 +58,13 @@ public class PlankController : MonoBehaviour
             _currentTargetIndex %= _targets.Length;
         }
     }
-    
+
     void RotateMove()
     {
         float angle = _num * (360 / _dNum) + 90f;
         float rad = angle * Mathf.Deg2Rad;
-        float x = _targets[_currentTargetIndex].position.x + _l * Mathf.Cos(_th * _rotateSpeed +rad);
-        float y = _targets[_currentTargetIndex].position.y + _l * Mathf.Sin(_th * _rotateSpeed +rad);
+        float x = _targets[_currentTargetIndex].position.x + _l * Mathf.Cos(_th * _rotateSpeed + rad);
+        float y = _targets[_currentTargetIndex].position.y + _l * Mathf.Sin(_th * _rotateSpeed + rad);
         gameObject.transform.position = new Vector3(x, y, 0);
         _th += Time.deltaTime;
     }

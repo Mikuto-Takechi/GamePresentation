@@ -20,10 +20,10 @@ public class EnemyController : MonoBehaviour
     Transform _muzzle;
     Slider _healthSlider;
     Text _healthText;
-    Text _damageText;
+    Text _hpTransition;
     bool _moveLeft = false;
     int _currentHealth = 0;
-    float _timer, _damageUITimer, _damageUIInterval = 1.0f;
+    float _timer, _hpTransitionTimer, _hpTransitionInterval = 1.0f;
 
     public int CurrentHealth
     {
@@ -40,25 +40,25 @@ public class EnemyController : MonoBehaviour
         _muzzle = _shooter.GetChild(0);
         _healthSlider = transform.GetChild(1).GetChild(0).GetComponent<Slider>();
         _healthText = transform.GetChild(1).GetChild(1).GetComponent<Text>();
-        _damageText = transform.GetChild(1).GetChild(2).GetComponent<Text>();
+        _hpTransition = transform.GetChild(1).GetChild(2).GetComponent<Text>();
         _player = GameObject.Find("Player");
-        if(_damageText) _damageText.text = "";
+        if (_hpTransition) _hpTransition.text = "";
     }
 
     private void Update()
     {
         _timer += Time.deltaTime;
-        _damageUITimer += Time.deltaTime;
+        _hpTransitionTimer += Time.deltaTime;
         _healthSlider.value = (float)_currentHealth / (float)_maxHealth;
         _healthText.text = "HP: " + _currentHealth.ToString() + " / " + _maxHealth.ToString();
-        if(_currentHealth <= 0)
+        if (_currentHealth <= 0)
         {
             GManager.instance.Score += _killScore;
             Destroy(gameObject);
         }
-        if(_damageUITimer > _damageUIInterval)
+        if (_hpTransitionTimer > _hpTransitionInterval)
         {
-            _damageText.text = "";
+            _hpTransition.text = "";
         }
         if (_sr.isVisible && Camera.current.name != "SceneCamera" && Camera.current.name != "Preview Camera")
         {
@@ -130,9 +130,16 @@ public class EnemyController : MonoBehaviour
         _rb.velocity = velo;        // 速度ベクトルをセットする
     }
 
-    public void DamageUI(int dam)
+    public void HPTransition(int trans)
     {
-        _damageText.text = $"-{dam}";
-        _damageUITimer = 0.0f;
+        string transText = $"{trans}";
+        if (trans > 0)
+        {
+            _hpTransition.color = Color.green;
+            transText = "+" + trans.ToString();
+        }
+        if (trans < 0) _hpTransition.color = Color.blue;
+        _hpTransition.text = transText;
+        _hpTransitionTimer = 0.0f;
     }
 }

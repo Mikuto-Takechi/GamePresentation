@@ -47,7 +47,7 @@ public class GManager : MonoBehaviour
     }
     private void Awake()
     {
-        if(instance == null)
+        if (instance == null)
         {
             instance = this;
             DontDestroyOnLoad(gameObject);
@@ -58,5 +58,9 @@ public class GManager : MonoBehaviour
         }
         _score = _scoreDefault;
         _hp = _hpDefault;
+    }
+    private void FixedUpdate()
+    {
+        if (_hp > _hpDefault) _hp = _hpDefault;
     }
 }

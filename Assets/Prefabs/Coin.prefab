@@ -115,7 +115,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fef696d91b69fa74cbb5ca8b315357e3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _coinAudioSource: {fileID: 2097739988460507741}
+  _coinAudioClip: {fileID: 8300000, guid: faa618c91d04ea8488d32983a79064d3, type: 3}
+  _cherryAudioClip: {fileID: 8300000, guid: ed469427a5453a6498d255e6292c7eca, type: 3}
+  _prefabName: Coin
 --- !u!82 &2097739988460507741
 AudioSource:
   m_ObjectHideFlags: 0
@@ -126,7 +128,7 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 8300000, guid: faa618c91d04ea8488d32983a79064d3, type: 3}
+  m_audioClip: {fileID: 0}
   m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1

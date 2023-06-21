@@ -121,10 +121,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _messageDistance: 2
-  _hitDamage: 3
-  _tileMapLayer:
-    serializedVersion: 2
-    m_Bits: 8
+  _hitDamage: -3
   filter2d:
     useTriggers: 0
     useLayerMask: 0

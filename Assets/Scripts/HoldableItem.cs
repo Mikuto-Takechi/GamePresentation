@@ -2,10 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MoveableBlockController : MonoBehaviour
+public class HoldableItem : MonoBehaviour
 {
     [SerializeField] float _messageDistance = 2.0f;
-    [SerializeField] int _hitDamage = 3;
+    [SerializeField] int _hitDamage = -3;
     [SerializeField] ContactFilter2D filter2d;
     public int _throwSpeed = 10;
     public bool _projectile = false;
@@ -36,7 +36,7 @@ public class MoveableBlockController : MonoBehaviour
             _deleteMessage = false;
             GManager.instance.Message = _itemName[gameObject.name];
         }
-        else if(distance > _messageDistance && !_deleteMessage)
+        else if (distance > _messageDistance && !_deleteMessage)
         {
             _deleteMessage = true;
             GManager.instance.Message = "";
@@ -57,20 +57,20 @@ public class MoveableBlockController : MonoBehaviour
             if (collision.gameObject.tag == "Enemy" && _projectile)
             {
                 var enemy = collision.gameObject.GetComponent<EnemyController>();
-                enemy.CurrentHealth -= _hitDamage;
-                enemy.DamageUI(_hitDamage);
+                enemy.CurrentHealth += _hitDamage;
+                enemy.HPTransition(_hitDamage);
             }
         }
     }
-    
+
     void InTheAir()
     {
-        if(gameObject.name == "Axe")
+        if (gameObject.name == "Axe")
         {
             var isTouched = GetComponent<Rigidbody2D>().IsTouching(filter2d);
-            if(isTouched)
+            if (isTouched)
             {
-                if(_projectile) _projectile = false;
+                if (_projectile) _projectile = false;
             }
             else
             {
