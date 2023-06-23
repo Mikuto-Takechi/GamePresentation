@@ -8,8 +8,8 @@ public class GManager : MonoBehaviour
     public static GManager instance;
     [SerializeField] int _scoreDefault = 0;
     [SerializeField] int _hpDefault = 20;
-    [SerializeField] AudioSource _se;
-    [SerializeField] AudioSource _loop;
+    public AudioSource _se;
+    public AudioSource _loop;
     [SerializeField] List<AudioClip> _audioList;
     [SerializeField] List<AudioClip> _bgmList;
     private string _message;

@@ -46,6 +46,11 @@ public class UIManager : MonoBehaviour
         }
     }
 
+    public void ClickSound()
+    {
+        GManager.instance.PlaySound(8);
+    }
+
     public void GameClear()
     {
         _displayCanvas.SetActive(false);
