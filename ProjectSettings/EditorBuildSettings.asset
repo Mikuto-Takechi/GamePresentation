@@ -9,6 +9,9 @@ EditorBuildSettings:
     path: Assets/Scenes/TitleScene.unity
     guid: 3b45f9f24925aee45a18f6ee01303797
   - enabled: 1
+    path: Assets/Scenes/FlatStage.unity
+    guid: 6897e3d59cce3f748b0c36a00c95b373
+  - enabled: 1
     path: Assets/Scenes/Stage1.unity
     guid: 2cda990e2423bbf4892e6590ba056729
   m_configObjects: {}

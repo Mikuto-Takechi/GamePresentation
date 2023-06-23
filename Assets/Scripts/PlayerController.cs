@@ -10,7 +10,6 @@ public class PlayerController : MonoBehaviour
 {
     [SerializeField] float m_maxMovePower = 10f;
     [SerializeField] float m_jumpPower = 5f;
-    [SerializeField] AudioClip m_hurtAudioClip = default;
     [SerializeField] Tilemap m_tilemap;
     [SerializeField] Slider m_hpSlider;
     Image m_holdItem;
@@ -21,9 +20,7 @@ public class PlayerController : MonoBehaviour
     Text _hpTransition;
     GameObject m_vanner;
     Animator m_Animator;
-    AudioSource m_AudioSource;
     Rigidbody2D m_rigidbody = default;
-    Renderer m_Renderer;
     float m_horizontal;
     Vector3 m_initialPosition;
     bool isGrounded = false;
@@ -45,10 +42,8 @@ public class PlayerController : MonoBehaviour
     }
     void Start()
     {
-        m_AudioSource = GetComponent<AudioSource>();
         m_Animator = GetComponent<Animator>();
         m_rigidbody = GetComponent<Rigidbody2D>();
-        m_Renderer = GetComponent<Renderer>();
         m_selectionTile = GameObject.Find("SelectionTile");
         m_arrow = GameObject.Find("Player/WorldCanvas/Arrow");
         m_throwArrow = GameObject.Find("Player/WorldCanvas/ThrowArrow");
@@ -114,7 +109,7 @@ public class PlayerController : MonoBehaviour
             m_timer = 0.0f;
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             RaycastHit2D hit2d = Physics2D.Raycast((Vector2)ray.origin, (Vector2)ray.direction);
-            if (hit2d.collider.CompareTag("Holdable") && Vector2.Distance((Vector2)ray.origin, (Vector2)transform.position) < 2 && !isHolding)
+            if (hit2d.collider && hit2d.collider.CompareTag("Holdable") && Vector2.Distance((Vector2)ray.origin, (Vector2)transform.position) < 2 && !isHolding)
             {
                 float x = transform.position.x;
                 float y = transform.position.y;
@@ -130,9 +125,9 @@ public class PlayerController : MonoBehaviour
 
         if (Input.GetButtonDown("Fire2"))
         {
-            Transform child = transform.GetChild(2);
-            if (child != null)
+            if (transform.childCount >= 3)
             {
+                Transform child = transform.GetChild(2);
                 Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
                 Vector3 forward = Vector3.Scale((mousePos - child.position), new Vector3(1, 1, 0)).normalized;
                 Rigidbody2D cRigidbody = child.GetComponent<Rigidbody2D>();
@@ -168,7 +163,7 @@ public class PlayerController : MonoBehaviour
     public void HurtPlay()
     {
         m_Animator.Play("PlayerHurt");
-        m_AudioSource.PlayOneShot(m_hurtAudioClip);
+        GManager.instance.PlaySound(2);
     }
 
     public void HPTransition(int trans)

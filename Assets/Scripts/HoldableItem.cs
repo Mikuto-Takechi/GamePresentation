@@ -49,13 +49,12 @@ public class HoldableItem : MonoBehaviour
         {
             if (collision.gameObject.tag == "Obstacle" && _projectile)
             {
-                Vector3 pos = GameObject.Find("Main Camera").transform.position;
-                AudioClip clip = collision.gameObject.GetComponent<AudioSource>().clip;
-                AudioSource.PlayClipAtPoint(clip, pos);
+                GManager.instance.PlaySound(1);
                 Destroy(collision.gameObject);
             }
             if (collision.gameObject.tag == "Enemy" && _projectile)
             {
+                GManager.instance.PlaySound(7);
                 var enemy = collision.gameObject.GetComponent<EnemyController>();
                 enemy.CurrentHealth += _hitDamage;
                 enemy.HPTransition(_hitDamage);

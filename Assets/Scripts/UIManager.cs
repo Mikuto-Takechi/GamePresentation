@@ -6,17 +6,13 @@ using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
 {
-    [SerializeField] AudioClip _gameOverSound;
-    [SerializeField] AudioClip _gameClearSound;
-    [SerializeField] AudioClip _gamePauseSound;
     [SerializeField] GameObject _gameOverCanvas;
     [SerializeField] GameObject _gameClearCanvas;
     [SerializeField] GameObject _gamePauseCanvas;
     [SerializeField] GameObject _manualCanvas;
     [SerializeField] GameObject _displayCanvas;
-    [SerializeField] GameObject _bGM;
+    [SerializeField] string _stageName;
     GameObject _timeManager;
-    AudioSource _audioSource;
     bool _gameClear = false;
     bool _gameOver = false;
     bool _gamePause = false;
@@ -33,7 +29,6 @@ public class UIManager : MonoBehaviour
         _gameClearCanvas.SetActive(false);
         _gamePauseCanvas.SetActive(false);
         _manualCanvas.SetActive(false);
-        _audioSource = gameObject.GetComponent<AudioSource>();
         _timeManager = GameObject.Find("TimeManager");
     }
     private void FixedUpdate()
@@ -54,24 +49,24 @@ public class UIManager : MonoBehaviour
     public void GameClear()
     {
         _displayCanvas.SetActive(false);
-        _bGM.SetActive(false);
-        _audioSource.PlayOneShot(_gameClearSound);
+        GManager.instance.StopBGM();
+        GManager.instance.PlaySound(6);
         _gameClearCanvas.SetActive(true);
 
         string scoreStr = GManager.instance.Score.ToString();
         string scoreText = $"スコア：{scoreStr}";
-        if (GManager.instance.ScoreRecord < GManager.instance.Score)
+        if (GManager.instance._scoreRecords[_stageName] < GManager.instance.Score)
         {
-            GManager.instance.ScoreRecord = GManager.instance.Score;
+            GManager.instance._scoreRecords[_stageName] = GManager.instance.Score;
             scoreText = $"スコア：{scoreStr} 記録更新！！";
         }
         _gameClearCanvas.transform.GetChild(0).GetChild(0).GetComponent<Text>().text = scoreText;
 
         float stageTime = _timeManager.GetComponent<TimeManager>().StageTime;
         string timeText = $"クリアタイム：{stageTime.ToString("F2")}";
-        if(GManager.instance.TimeRecord > stageTime)
+        if (GManager.instance._timeRecords[_stageName] > stageTime)
         {
-            GManager.instance.TimeRecord = stageTime;
+            GManager.instance._timeRecords[_stageName] = stageTime;
             timeText = $"クリアタイム：{stageTime.ToString("F2")} 記録更新！！";
         }
         _gameClearCanvas.transform.GetChild(0).GetChild(1).GetComponent<Text>().text = timeText;
@@ -84,8 +79,8 @@ public class UIManager : MonoBehaviour
         if( !_gameClear && !_gameOver && !_gamePause)
         {
             _displayCanvas.SetActive(false);
-            _bGM.SetActive(false);
-            _audioSource.PlayOneShot(_gamePauseSound);
+            GManager.instance.PauseBGM(true);
+            GManager.instance.PlaySound(5);
             _gamePauseCanvas.SetActive(true);
             float stageTime = _timeManager.GetComponent<TimeManager>().StageTime;
             _gamePauseCanvas.transform.GetChild(0).GetChild(0).GetComponent<Text>().text = "現在のタイム：" + stageTime.ToString("F2");
@@ -97,7 +92,7 @@ public class UIManager : MonoBehaviour
     public void Return()
     {
         _displayCanvas.SetActive(true);
-        _bGM.SetActive(true);
+        GManager.instance.PauseBGM(false);
         _gamePauseCanvas.SetActive(false);
         _gamePause = false;
         _currentPageIndex = 0;
@@ -132,8 +127,8 @@ public class UIManager : MonoBehaviour
     private void GameOver()
     {
         _displayCanvas.SetActive(false);
-        _bGM.SetActive(false);
-        _audioSource.PlayOneShot(_gameOverSound);
+        GManager.instance.StopBGM();
+        GManager.instance.PlaySound(3);
         _gameOverCanvas.SetActive(true);
         string scoreText = GManager.instance.Score.ToString();
         _gameOverCanvas.transform.GetChild(0).GetChild(0).GetComponent<Text>().text = $"最終スコア{scoreText}";
@@ -155,7 +150,6 @@ public class UIManager : MonoBehaviour
         GManager.instance.Hp = GManager.instance.hpDefault;
         _gameOverCanvas.SetActive(false);
         _displayCanvas.SetActive(true);
-        _bGM.SetActive(true);
         Time.timeScale = 1.0f;
     }
 

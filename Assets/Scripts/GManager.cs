@@ -8,24 +8,27 @@ public class GManager : MonoBehaviour
     public static GManager instance;
     [SerializeField] int _scoreDefault = 0;
     [SerializeField] int _hpDefault = 20;
+    [SerializeField] AudioSource _se;
+    [SerializeField] AudioSource _loop;
+    [SerializeField] List<AudioClip> _audioList;
+    [SerializeField] List<AudioClip> _bgmList;
     private string _message;
     private int _score;
     private int _hp;
-    float _timeRecord = 999999f;
-    int _scoreRecord;
-
-    public float TimeRecord
+    public Dictionary<string, float> _timeRecords = new Dictionary<string, float>()
     {
-        set { _timeRecord = value; }
-        get { return _timeRecord; }
-    }
-
-    public int ScoreRecord
+        {"stage1",999999f },
+        {"stage2",999999f },
+        {"stage3",999999f },
+        {"stage4",999999f }
+    };
+    public Dictionary<string, int> _scoreRecords = new Dictionary<string, int>()
     {
-        set { _scoreRecord = value; }
-        get { return _scoreRecord; }
-    }
-
+        {"stage1",0 },
+        {"stage2",0 },
+        {"stage3",0 },
+        {"stage4",0 }
+    };
     public string Message
     {
         set { _message = value; }
@@ -45,6 +48,7 @@ public class GManager : MonoBehaviour
     {
         get { return _hpDefault; }
     }
+
     private void Awake()
     {
         if (instance == null)
@@ -62,5 +66,29 @@ public class GManager : MonoBehaviour
     private void FixedUpdate()
     {
         if (_hp > _hpDefault) _hp = _hpDefault;
+    }
+    public void PlaySound(int num)
+    {
+        _se.PlayOneShot(_audioList[num]);
+    }
+    public void PlayBGM(int num)
+    {
+        _loop.clip = _bgmList[num];
+        _loop.Play();
+    }
+    public void PauseBGM(bool flag)
+    {
+        if (flag)
+        {
+            _loop.Pause();
+        }
+        else
+        {
+            _loop.UnPause();
+        }
+    }
+    public void StopBGM()
+    {
+        _loop.Stop();
     }
 }

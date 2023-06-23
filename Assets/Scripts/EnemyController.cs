@@ -60,7 +60,7 @@ public class EnemyController : MonoBehaviour
         {
             _hpTransition.text = "";
         }
-        if (_sr.isVisible && Camera.current.name != "SceneCamera" && Camera.current.name != "Preview Camera")
+        if (_sr.isVisible)
         {
             Move();
             _shooter.up = _player.transform.position - transform.position;

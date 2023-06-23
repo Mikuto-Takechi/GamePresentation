@@ -7,17 +7,33 @@ using UnityEngine.UI;
 
 public class SManager : MonoBehaviour
 {
-    [SerializeField] GameObject _recordUI;
+    [SerializeField] GameObject _stageRecord1;
+    [SerializeField] GameObject _stageRecord2;
+    [SerializeField] GameObject _stageRecord3;
+    [SerializeField] GameObject _stageRecord4;
     private void FixedUpdate()
     {
-        if(_recordUI)
+        if(_stageRecord1)
         {
-            _recordUI.GetComponent<Text>().text = $"現在最速クリアタイム：{GManager.instance.TimeRecord.ToString("F2")}\n現在最高スコア：{GManager.instance.ScoreRecord}";
+            _stageRecord1.GetComponent<Text>().text = $"タイム：{GManager.instance._timeRecords["stage1"].ToString("F2")}\nスコア：{GManager.instance._scoreRecords["stage1"]}";
+        }
+        if (_stageRecord2)
+        {
+            _stageRecord2.GetComponent<Text>().text = $"タイム：{GManager.instance._timeRecords["stage2"].ToString("F2")}\nスコア：{GManager.instance._scoreRecords["stage2"]}";
+        }
+        if (_stageRecord3)
+        {
+            _stageRecord3.GetComponent<Text>().text = $"タイム：{GManager.instance._timeRecords["stage3"].ToString("F2")}\nスコア：{GManager.instance._scoreRecords["stage3"]}";
+        }
+        if (_stageRecord4)
+        {
+            _stageRecord4.GetComponent<Text>().text = $"タイム：{GManager.instance._timeRecords["stage4"].ToString("F2")}\nスコア：{GManager.instance._scoreRecords["stage4"]}";
         }
     }
-    public void StartGame()
+    public void StartGame(int num)
     {
-        SceneManager.LoadScene("Stage1");
+        if (num <= 0) num = 1;
+        SceneManager.LoadScene(num);
     }
 
     public void TitleScene()
