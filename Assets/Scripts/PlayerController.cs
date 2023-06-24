@@ -30,6 +30,8 @@ public class PlayerController : MonoBehaviour
     float m_interval = 0.1f;
     float m_timer = 0.0f;
     float _hpTransitionTimer, _hpTransitionInterval = 1.0f;
+    List<Vector3> _linePoints = new List<Vector3>();
+    LineRenderer _lineRenderer;
     public Vector3 InitialPosition
     {
         set { m_initialPosition = value; }
@@ -57,6 +59,8 @@ public class PlayerController : MonoBehaviour
         if (_hpTransition) _hpTransition.text = "";
         m_initialPosition = this.transform.position;
         m_hpSlider.value = GManager.instance.hpDefault;
+        _lineRenderer = GetComponent<LineRenderer>();
+        _lineRenderer.enabled = false;
     }
 
     void Update()
@@ -143,10 +147,17 @@ public class PlayerController : MonoBehaviour
 
         if (isHolding)
         {
+            _lineRenderer.enabled = true;
+            Transform child = transform.GetChild(2);
+            var speed = child.GetComponent<HoldableItem>()._throwSpeed;
+            Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            Vector3 forward = Vector3.Scale((mousePos - child.position), new Vector3(1, 1, 0)).normalized;
             m_throwArrow.GetComponent<Image>().enabled = true;
+            ThrowLine(child.position, (Vector2)forward * speed);
         }
         else
         {
+            _lineRenderer.enabled = false;
             m_throwArrow.GetComponent<Image>().enabled = false;
         }
 
@@ -177,6 +188,23 @@ public class PlayerController : MonoBehaviour
         if (trans < 0) _hpTransition.color = Color.blue;
         _hpTransition.text = transText;
         _hpTransitionTimer = 0.0f;
+    }
+    void ThrowLine(Vector2 pos, Vector2 vector)
+    {
+        int maxLine = 200;
+        _linePoints.Clear();
+        Vector2 gravity = Physics2D.gravity * Time.fixedDeltaTime;
+        Vector2 currentVector = vector;
+        Vector2 currentPos = pos;
+        for(int i = 0; i < maxLine; i++)
+        {
+            Vector2 nextPos = currentPos + (currentVector * Time.fixedDeltaTime);
+            currentVector += gravity;
+            _linePoints.Add(nextPos);
+            currentPos = nextPos;
+        }
+        _lineRenderer.positionCount = _linePoints.Count;
+        _lineRenderer.SetPositions(_linePoints.ToArray());
     }
     void FixedUpdate()//‰¡ˆÚ“®
     {
