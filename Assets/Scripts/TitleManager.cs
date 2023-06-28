@@ -20,6 +20,14 @@ public class TitleManager : MonoBehaviour
     {
         _stageSelectCanvas.SetActive(!_stageSelectCanvas.activeSelf);
         _mainCanvas.SetActive(!_mainCanvas.activeSelf);
+        if (_stageSelectCanvas.activeSelf)
+        {
+            _stageSelectCanvas.transform.Find("Stage1")?.GetComponent<Button>().Select();
+        }
+        if (_mainCanvas.activeSelf)
+        {
+            _mainCanvas.transform.Find("Start")?.GetComponent<Button>().Select();
+        }
     }
     public void VolumeBGM(float volume)
     {

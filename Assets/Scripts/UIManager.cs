@@ -17,10 +17,21 @@ public class UIManager : MonoBehaviour
     bool _gameOver = false;
     bool _gamePause = false;
     int _currentPageIndex = 0;
+    MyInputs _myInputs;     // Input System
 
     public int CurrentPageIndex
     {
         get { return _currentPageIndex; }
+    }
+
+    private void Awake()
+    {
+        _myInputs = new MyInputs();
+        _myInputs.Enable();
+    }
+    private void OnDestroy()
+    {
+        _myInputs?.Dispose();
     }
 
     private void Start()
@@ -40,7 +51,7 @@ public class UIManager : MonoBehaviour
     }
     private void Update()
     {
-        if (Input.GetButtonDown("Pause"))
+        if (_myInputs.UI.Pause.triggered)
         {
             GamePause();
         }
@@ -57,7 +68,7 @@ public class UIManager : MonoBehaviour
         GManager.instance.StopBGM();
         GManager.instance.PlaySound(6);
         _gameClearCanvas.SetActive(true);
-
+        _gameClearCanvas.transform.Find("Panel").Find("Next")?.GetComponent<Button>().Select();
         string scoreStr = GManager.instance.Score.ToString();
         string scoreText = $"スコア：{scoreStr}";
         if (GManager.instance._scoreRecords[_stageName] < GManager.instance.Score)
@@ -81,12 +92,13 @@ public class UIManager : MonoBehaviour
 
     public void GamePause()
     {
-        if( !_gameClear && !_gameOver && !_gamePause)
+        if (!_gameClear && !_gameOver && !_gamePause)
         {
             _displayCanvas.SetActive(false);
             GManager.instance.PauseBGM(true);
             GManager.instance.PlaySound(5);
             _gamePauseCanvas.SetActive(true);
+            _gamePauseCanvas.transform.Find("Panel").Find("Return")?.GetComponent<Button>().Select();
             float stageTime = _timeManager.GetComponent<TimeManager>().StageTime;
             _gamePauseCanvas.transform.GetChild(0).GetChild(0).GetComponent<Text>().text = "現在のタイム：" + stageTime.ToString("F2");
             _gamePause = true;
@@ -108,9 +120,14 @@ public class UIManager : MonoBehaviour
     {
         _gamePauseCanvas.SetActive(!_gamePauseCanvas.activeSelf);
         _manualCanvas.SetActive(!_manualCanvas.activeSelf);
-        if( _manualCanvas.activeSelf )
+        if (_manualCanvas.activeSelf)
         {
+            _manualCanvas.transform.Find("Page")?.GetComponent<Button>().Select();
             Page();
+        }
+        if (_gamePauseCanvas.activeSelf)
+        {
+            _gamePauseCanvas.transform.Find("Panel").Find("Return")?.GetComponent<Button>().Select();
         }
     }
     public void Page()
@@ -135,6 +152,7 @@ public class UIManager : MonoBehaviour
         GManager.instance.StopBGM();
         GManager.instance.PlaySound(3);
         _gameOverCanvas.SetActive(true);
+        _gameOverCanvas.transform.Find("Panel").Find("Restart")?.GetComponent<Button>().Select();
         string scoreText = GManager.instance.Score.ToString();
         _gameOverCanvas.transform.GetChild(0).GetChild(0).GetComponent<Text>().text = $"最終スコア{scoreText}";
         _gameOver = true;

@@ -1,10 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
-using Unity.Burst.CompilerServices;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Animations;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.LowLevel;
+using UnityEngine.InputSystem.UI;
 using UnityEngine.Tilemaps;
 using UnityEngine.UI;
-using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
 
 public class PlayerController : MonoBehaviour
 {
@@ -14,6 +17,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] Slider m_hpSlider;
     Image m_holdItem;
     GameObject m_selectionTile;
+    GameObject m_gameCursor;
     GameObject m_arrow;
     GameObject m_throwArrow;
     Text m_arrowMessage;
@@ -26,12 +30,15 @@ public class PlayerController : MonoBehaviour
     bool isGrounded = false;
     bool isHolding = false;
     bool isCliming = false;
-    bool jumpButtonFlag = false;
     float m_interval = 0.1f;
     float m_timer = 0.0f;
     float _hpTransitionTimer, _hpTransitionInterval = 1.0f;
     List<Vector3> _linePoints = new List<Vector3>();
     LineRenderer _lineRenderer;
+    MyInputs _myInputs;     // Input System
+    /// <summary>マウスの座標を記録</summary>
+    Vector3 m_mousePos;
+    PlayerInput _playerInput;
     public Vector3 InitialPosition
     {
         set { m_initialPosition = value; }
@@ -42,11 +49,21 @@ public class PlayerController : MonoBehaviour
         set { isHolding = value; }
         get { return isHolding; }
     }
+    private void Awake()
+    {
+        _myInputs = new MyInputs();
+        _myInputs.Enable();
+    }
+    private void OnDestroy()
+    {
+        _myInputs?.Dispose();
+    }
     void Start()
     {
         m_Animator = GetComponent<Animator>();
         m_rigidbody = GetComponent<Rigidbody2D>();
         m_selectionTile = GameObject.Find("SelectionTile");
+        m_gameCursor = GameObject.Find("GameCursor");
         m_arrow = GameObject.Find("Player/WorldCanvas/Arrow");
         m_throwArrow = GameObject.Find("Player/WorldCanvas/ThrowArrow");
         m_arrowMessage = GameObject.Find("Player/WorldCanvas/ArrowMessage").GetComponent<Text>();
@@ -61,13 +78,25 @@ public class PlayerController : MonoBehaviour
         m_hpSlider.value = GManager.instance.hpDefault;
         _lineRenderer = GetComponent<LineRenderer>();
         _lineRenderer.enabled = false;
+        _playerInput = GetComponent<PlayerInput>();
     }
 
     void Update()
     {
+        if (_playerInput.currentControlScheme == "Keyboard & Mouse")
+        {
+            m_mousePos = _myInputs.Player.MouseCursor.ReadValue<Vector2>();
+        }
+        if (_playerInput.currentControlScheme == "GamePad")
+        {
+            m_mousePos += (Vector3)_myInputs.Player.VirtualCursor.ReadValue<Vector2>();
+        }
+        CursorLock();
         m_timer += Time.deltaTime;
         _hpTransitionTimer += Time.deltaTime;
-        Vector3 worldMousePoint = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        m_horizontal = _myInputs.Player.Horizontal.ReadValue<float>();
+        Vector3 worldMousePoint = Camera.main.ScreenToWorldPoint(m_mousePos);
+        if (m_gameCursor) m_gameCursor.transform.position = (Vector2)worldMousePoint;
         Color rainbowColor = Color.HSVToRGB(Time.time % 1, 1, 1);//虹色
         rainbowColor.a = 0.8f;//不透明度
         m_hpSlider.value = (float)GManager.instance.Hp / (float)GManager.instance.hpDefault;
@@ -88,30 +117,20 @@ public class PlayerController : MonoBehaviour
         Vector3 worldPos = m_tilemap.CellToWorld(gridPos) + completePos;
         m_selectionTile.SetActive(true);
         m_selectionTile.transform.position = worldPos;
-
-        if (Input.GetButton("Jump"))
-        {
-            jumpButtonFlag = true;
-        }
-        else if (Input.GetButtonUp("Jump"))
-        {
-            jumpButtonFlag = false;
-        }
-        m_horizontal = Input.GetAxisRaw("Horizontal");
-        if (jumpButtonFlag && (isCliming))
+        if (_myInputs.Player.Jump.IsPressed() && (isCliming))
         {
             m_rigidbody.velocity = new Vector2(0, 5);
         }
-        else if (Input.GetButtonDown("Jump") && (isGrounded))
+        else if (_myInputs.Player.Jump.triggered && (isGrounded))
         {
             m_rigidbody.AddForce(Vector2.up * m_jumpPower, ForceMode2D.Impulse);//Impulseにすると爆発的に飛ぶ
         }
 
-        if (Input.GetButtonDown("Fire1"))
+        if (_myInputs.Player.Interact.triggered)
         {
             m_selectionTile.GetComponent<SpriteRenderer>().color = new Color(0.6f, 0.6f, 0.6f, 0.2f);
             m_timer = 0.0f;
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            Ray ray = Camera.main.ScreenPointToRay(m_mousePos);
             RaycastHit2D hit2d = Physics2D.Raycast((Vector2)ray.origin, (Vector2)ray.direction);
             if (hit2d.collider && hit2d.collider.CompareTag("Holdable") && Vector2.Distance((Vector2)ray.origin, (Vector2)transform.position) < 2 && !isHolding)
             {
@@ -127,12 +146,12 @@ public class PlayerController : MonoBehaviour
             }
         }
 
-        if (Input.GetButtonDown("Fire2"))
+        if (_myInputs.Player.Throw.triggered)
         {
             if (transform.childCount >= 3)
             {
                 Transform child = transform.GetChild(2);
-                Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                Vector3 mousePos = Camera.main.ScreenToWorldPoint(m_mousePos);
                 Vector3 forward = Vector3.Scale((mousePos - child.position), new Vector3(1, 1, 0)).normalized;
                 Rigidbody2D cRigidbody = child.GetComponent<Rigidbody2D>();
                 cRigidbody.isKinematic = false;
@@ -150,7 +169,7 @@ public class PlayerController : MonoBehaviour
             _lineRenderer.enabled = true;
             Transform child = transform.GetChild(2);
             var speed = child.GetComponent<HoldableItem>()._throwSpeed;
-            Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            Vector3 mousePos = Camera.main.ScreenToWorldPoint(m_mousePos);
             Vector3 forward = Vector3.Scale((mousePos - child.position), new Vector3(1, 1, 0)).normalized;
             m_throwArrow.GetComponent<Image>().enabled = true;
             ThrowLine(child.position, (Vector2)forward * speed);
@@ -196,7 +215,7 @@ public class PlayerController : MonoBehaviour
         Vector2 gravity = Physics2D.gravity * Time.fixedDeltaTime;
         Vector2 currentVector = vector;
         Vector2 currentPos = pos;
-        for(int i = 0; i < maxLine; i++)
+        for (int i = 0; i < maxLine; i++)
         {
             Vector2 nextPos = currentPos + (currentVector * Time.fixedDeltaTime);
             currentVector += gravity;
@@ -205,6 +224,24 @@ public class PlayerController : MonoBehaviour
         }
         _lineRenderer.positionCount = _linePoints.Count;
         _lineRenderer.SetPositions(_linePoints.ToArray());
+    }
+
+    void CursorLock()
+    {
+        float x = m_mousePos.x, y = m_mousePos.y;
+
+        if (m_mousePos.x < 0)
+        {
+            x = 0;
+        }
+        else if (m_mousePos.x > Screen.width)
+        {
+            x = Screen.width;
+        }
+
+        if (m_mousePos.y < 0) { y = 0; } else if (m_mousePos.y > Screen.height) { y = Screen.height; }
+
+        m_mousePos = new Vector3(x, y, 0);
     }
     void FixedUpdate()//横移動
     {
@@ -236,4 +273,6 @@ public class PlayerController : MonoBehaviour
         }
         isGrounded = false;
     }
+
+
 }
