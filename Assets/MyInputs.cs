@@ -82,13 +82,13 @@ public partial class @MyInputs: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": true
                 },
                 {
-                    ""name"": ""Zoom"",
-                    ""type"": ""Button"",
-                    ""id"": ""2287b05f-0817-4f2b-bfa5-508de15bc879"",
-                    ""expectedControlType"": ""Button"",
+                    ""name"": ""CameraSize"",
+                    ""type"": ""Value"",
+                    ""id"": ""ac8e90c3-7e22-490a-b785-80a6304a5cef"",
+                    ""expectedControlType"": ""Axis"",
                     ""processors"": """",
                     ""interactions"": """",
-                    ""initialStateCheck"": false
+                    ""initialStateCheck"": true
                 }
             ],
             ""bindings"": [
@@ -302,26 +302,70 @@ public partial class @MyInputs: IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": false
                 },
                 {
-                    ""name"": """",
-                    ""id"": ""6b26e2e2-e773-4597-bff7-b91a7ec49071"",
-                    ""path"": ""<Gamepad>/buttonNorth"",
+                    ""name"": ""MouseAxis"",
+                    ""id"": ""a3e77817-ca53-4e5e-ba34-a7c032eba68d"",
+                    ""path"": ""1DAxis(minValue=-0.01,maxValue=0.01)"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": ""GamePad"",
-                    ""action"": ""Zoom"",
-                    ""isComposite"": false,
+                    ""groups"": """",
+                    ""action"": ""CameraSize"",
+                    ""isComposite"": true,
                     ""isPartOfComposite"": false
                 },
                 {
-                    ""name"": """",
-                    ""id"": ""84777fb2-9547-4d50-a21b-f9c8cbac4c78"",
-                    ""path"": ""<Keyboard>/z"",
+                    ""name"": ""negative"",
+                    ""id"": ""e74314e6-5565-437c-a109-e901ce0a99ce"",
+                    ""path"": ""<Mouse>/scroll/down"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""Keyboard & Mouse"",
-                    ""action"": ""Zoom"",
+                    ""action"": ""CameraSize"",
                     ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""positive"",
+                    ""id"": ""7466c60b-73cd-4320-8ed1-423f37f62ea7"",
+                    ""path"": ""<Mouse>/scroll/up"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard & Mouse"",
+                    ""action"": ""CameraSize"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""GamePadAxis"",
+                    ""id"": ""965de177-3980-4b8b-a475-10e3c14ede51"",
+                    ""path"": ""1DAxis(minValue=-0.05,maxValue=0.05)"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""CameraSize"",
+                    ""isComposite"": true,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""negative"",
+                    ""id"": ""4827b8bb-0b21-42af-859f-973ed0eca37c"",
+                    ""path"": ""<Gamepad>/dpad/down"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""GamePad"",
+                    ""action"": ""CameraSize"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""positive"",
+                    ""id"": ""082c3637-ee4d-4df9-8b9a-eb200cbba7bb"",
+                    ""path"": ""<Gamepad>/dpad/up"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""GamePad"",
+                    ""action"": ""CameraSize"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
                 }
             ]
         },
@@ -414,7 +458,7 @@ public partial class @MyInputs: IInputActionCollection2, IDisposable
         m_Player_Throw = m_Player.FindAction("Throw", throwIfNotFound: true);
         m_Player_VirtualCursor = m_Player.FindAction("VirtualCursor", throwIfNotFound: true);
         m_Player_MouseCursor = m_Player.FindAction("MouseCursor", throwIfNotFound: true);
-        m_Player_Zoom = m_Player.FindAction("Zoom", throwIfNotFound: true);
+        m_Player_CameraSize = m_Player.FindAction("CameraSize", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Pause = m_UI.FindAction("Pause", throwIfNotFound: true);
@@ -485,7 +529,7 @@ public partial class @MyInputs: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Throw;
     private readonly InputAction m_Player_VirtualCursor;
     private readonly InputAction m_Player_MouseCursor;
-    private readonly InputAction m_Player_Zoom;
+    private readonly InputAction m_Player_CameraSize;
     public struct PlayerActions
     {
         private @MyInputs m_Wrapper;
@@ -496,7 +540,7 @@ public partial class @MyInputs: IInputActionCollection2, IDisposable
         public InputAction @Throw => m_Wrapper.m_Player_Throw;
         public InputAction @VirtualCursor => m_Wrapper.m_Player_VirtualCursor;
         public InputAction @MouseCursor => m_Wrapper.m_Player_MouseCursor;
-        public InputAction @Zoom => m_Wrapper.m_Player_Zoom;
+        public InputAction @CameraSize => m_Wrapper.m_Player_CameraSize;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -524,9 +568,9 @@ public partial class @MyInputs: IInputActionCollection2, IDisposable
             @MouseCursor.started += instance.OnMouseCursor;
             @MouseCursor.performed += instance.OnMouseCursor;
             @MouseCursor.canceled += instance.OnMouseCursor;
-            @Zoom.started += instance.OnZoom;
-            @Zoom.performed += instance.OnZoom;
-            @Zoom.canceled += instance.OnZoom;
+            @CameraSize.started += instance.OnCameraSize;
+            @CameraSize.performed += instance.OnCameraSize;
+            @CameraSize.canceled += instance.OnCameraSize;
         }
 
         private void UnregisterCallbacks(IPlayerActions instance)
@@ -549,9 +593,9 @@ public partial class @MyInputs: IInputActionCollection2, IDisposable
             @MouseCursor.started -= instance.OnMouseCursor;
             @MouseCursor.performed -= instance.OnMouseCursor;
             @MouseCursor.canceled -= instance.OnMouseCursor;
-            @Zoom.started -= instance.OnZoom;
-            @Zoom.performed -= instance.OnZoom;
-            @Zoom.canceled -= instance.OnZoom;
+            @CameraSize.started -= instance.OnCameraSize;
+            @CameraSize.performed -= instance.OnCameraSize;
+            @CameraSize.canceled -= instance.OnCameraSize;
         }
 
         public void RemoveCallbacks(IPlayerActions instance)
@@ -650,7 +694,7 @@ public partial class @MyInputs: IInputActionCollection2, IDisposable
         void OnThrow(InputAction.CallbackContext context);
         void OnVirtualCursor(InputAction.CallbackContext context);
         void OnMouseCursor(InputAction.CallbackContext context);
-        void OnZoom(InputAction.CallbackContext context);
+        void OnCameraSize(InputAction.CallbackContext context);
     }
     public interface IUIActions
     {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class TextController : MonoBehaviour
+public class TextManager : MonoBehaviour
 {
     [SerializeField] Text _text1 = default;
     [SerializeField] Text _text2 = default;
@@ -11,8 +11,8 @@ public class TextController : MonoBehaviour
 
     void Update()
     {
-        _text1.text = $"Score:{GManager.instance.Score}";
-        _text2.text = $"HP:{GManager.instance.Hp}";
+        _text1.text = GManager.instance.Score.ToString();
+        _text2.text = GManager.instance.Hp.ToString();
         _text3.text = GManager.instance.Message;
     }
 }

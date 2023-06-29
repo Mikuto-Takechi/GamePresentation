@@ -39,6 +39,7 @@ public class PlayerController : MonoBehaviour
     /// <summary>マウスの座標を記録</summary>
     Vector3 m_mousePos;
     PlayerInput _playerInput;
+    GameObject _target;
     public Vector3 InitialPosition
     {
         set { m_initialPosition = value; }
@@ -126,13 +127,25 @@ public class PlayerController : MonoBehaviour
             m_rigidbody.AddForce(Vector2.up * m_jumpPower, ForceMode2D.Impulse);//Impulseにすると爆発的に飛ぶ
         }
 
+        Ray ray = Camera.main.ScreenPointToRay(m_mousePos);
+        RaycastHit2D hit2d = Physics2D.Raycast((Vector2)ray.origin, (Vector2)ray.direction);
+        bool canHold = hit2d.collider && hit2d.collider.CompareTag("Holdable") && Vector2.Distance((Vector2)ray.origin, (Vector2)transform.position) < 2 && !isHolding;
+        if (canHold)
+        {
+            _target = hit2d.collider.gameObject;
+            _target.GetComponent<HoldableItem>().SwitchHighLight(true);
+        }
+        else if(_target != null)
+        {
+            _target.GetComponent<HoldableItem>().SwitchHighLight(false);
+            _target = null;
+        }
         if (_myInputs.Player.Interact.triggered)
         {
             m_selectionTile.GetComponent<SpriteRenderer>().color = new Color(0.6f, 0.6f, 0.6f, 0.2f);
             m_timer = 0.0f;
-            Ray ray = Camera.main.ScreenPointToRay(m_mousePos);
-            RaycastHit2D hit2d = Physics2D.Raycast((Vector2)ray.origin, (Vector2)ray.direction);
-            if (hit2d.collider && hit2d.collider.CompareTag("Holdable") && Vector2.Distance((Vector2)ray.origin, (Vector2)transform.position) < 2 && !isHolding)
+    
+            if (canHold)
             {
                 float x = transform.position.x;
                 float y = transform.position.y;

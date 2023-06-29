@@ -22,7 +22,7 @@ public class TimeManager : MonoBehaviour
         _stageTime += Time.deltaTime;
         if(_timeText)
         {
-            _timeText.text = "Time: " + _stageTime.ToString("F2");
+            _timeText.text = _stageTime.ToString("F2");
         }
     }
 }
